@@ -131,6 +131,10 @@ AddModule("Configurations", function()
 end)
 
 AddModule("NewOption", function()
+    local ACTOR_HASHER = tostring(os.clock() + math.random()) do
+        _ENV.ACTOR_HASHER = ACTOR_HASHER
+    end
+    
     local function While(a, b, c, d)
         while a do
             local t = tick()
@@ -147,7 +151,7 @@ AddModule("NewOption", function()
     local function NewOption(Tag, Function, Time)
         Threads[Tag] = function(Value)
             While(Value, Time or 0.1, Function, function()
-                return not Value
+                return not Value or _ENV.ACTOR_HASHER ~= ACTOR_HASHER
             end)
         end
     end
@@ -218,6 +222,21 @@ AddModule("Plugins", function()
     end
 
     function Plugins:Toggle(Section, Title, Flag, Callback)
+        local function OnChanged(value)
+            if value then
+                Active[Flag] = task.spawn(function()
+                    if Threads[Flag] then Threads[Flag](Settings[Flag]) end
+                end)
+            else
+                if Active[Flag] then
+                    task.cancel(Active[Flag])
+                    ActiveT[Flag] = nil
+                end
+            end
+
+            if Callback then Callback(value) end
+        end
+        
         Fallback[Flag] = Section:AddToggle(Flag, {
             Text = Title,
             Default = Settings[Flag],
@@ -226,25 +245,17 @@ AddModule("Plugins", function()
                 Settings[Flag] = value
                 Configurations:Save(Flag, value)
 
-                if value then
-                    Active[Flag] = task.spawn(function()
-                        if Threads[Flag] then Threads[Flag](Settings[Flag]) end
-                    end)
-                else
-                    if Active[Flag] then
-                        task.cancel(Active[Flag])
-                        ActiveT[Flag] = nil
-                    end
-                end
-
-                if Callback then Callback(value) end
+                OnChanged(value)
             end,
         })
+        
+        OnChanged(Settings[Flag])
 
         return Fallback[Flag]
     end
 
     function Plugins:Slider(Section, Title, Values, Flag, Callback)
+        if Callback then Callback(Settings[Flag]) end
         return Section:AddSlider(Flag, {
             Text = Title,
             Default = Settings[Flag],
@@ -261,6 +272,7 @@ AddModule("Plugins", function()
     end
 
     function Plugins:Input(Section, Title, Flag, Callback)
+        if Callback then Callback(Settings[Flag]) end
         return Section:AddInput(Flag, {
             Default = Settings[Flag],
             Text = Title,
@@ -290,6 +302,7 @@ AddModule("Plugins", function()
         })
         
         Dropdown:SetValue(Settings[Flag])
+        if Callback then Callback(Settings[Flag]) end
         
         return Dropdown
     end
