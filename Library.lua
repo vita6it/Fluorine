@@ -674,6 +674,8 @@ function Library:App(Args)
                 Title_1.TextColor3 = Color3.fromRGB(234, 234, 234)
                 Title_1.TextSize = 17
                 Title_1.TextXAlignment = Enum.TextXAlignment.Left
+                Title_1.AutomaticSize = Enum.AutomaticSize.Y
+                Title_1.LineHeight = 1.1
             end
             
             function Tab:Label(Info)
