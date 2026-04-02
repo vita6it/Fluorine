@@ -164,64 +164,37 @@ AddModule("Plugins", function()
 
     local Configurations = Utils.Configurations
 
-    local function ToIndex(options, value)
-        if typeof(value) == "table" then
-            local indexes = {}
-
-            for _, v in ipairs(value) do
-                for i, opt in ipairs(options) do
-                    if opt == v then
-                        table.insert(indexes, i)
-                        break
-                    end
-                end
-            end
-
-            return indexes
-        else
-            for i, opt in ipairs(options) do
-                if opt == value then
-                    return i
-                end
-            end
-
-            return 1
-        end
-    end
-
     function Plugins.new(Info)
-        Plugins['Base'] = Library:CreateWindow({
+        Plugins['Base'] = Library:App({
             Title = Info[1],
-            Icon = Info[3],
-            NotifySide = "Right",
-            ShowCustomCursor = true,
             Footer = Info[2],
+            Logo = Info[3],
+            Width = 150
         })
 
         return Plugins['Base']
     end
 
     function Plugins:Tabs(Info)
-        return self['Base']:AddTab(Info[1], Info[2])
-    end
-
-    function Plugins:Section(Tab, Info)
-        if Info[3] == 'l' then
-            return Tab:AddLeftGroupbox(Info[1], Info[2]) 
-        end
-
-        return Tab:AddRightGroupbox(Info[1], Info[2]) 
-    end
-
-    function Plugins:Button(Section, Info, Callback)
-        return Section:AddButton({
-            Text = Info[1],
-            Tooltip = Info[2],
-            Func = Callback,
+        return self['Base']:MakeTab({
+            Title = Info[1],
+            Icon = Info[2]
         })
     end
 
-    function Plugins:Toggle(Section, Title, Flag, Callback)
+    function Plugins:Section(Tab, Info)
+        return Tab:Section(Info)
+    end
+
+    function Plugins:Button(Section, Info, Callback)
+        return Section:Button({
+            Title = Info[1],
+            Description = Info[2] or nil,
+            Callback = Callback,
+        })
+    end
+
+    function Plugins:Toggle(Section, Info, Flag, Callback)
         local function OnChanged(value)
             if value then
                 Active[Flag] = task.spawn(function()
@@ -237,9 +210,8 @@ AddModule("Plugins", function()
             if Callback then Callback(value) end
         end
         
-        Fallback[Flag] = Section:AddToggle(Flag, {
-            Text = Title,
-            Default = Settings[Flag],
+        Fallback[Flag] = Section:Toggle({
+            Title = Info,
             Value = Settings[Flag],
             Callback = function(value)
                 Settings[Flag] = value
@@ -248,19 +220,16 @@ AddModule("Plugins", function()
                 OnChanged(value)
             end,
         })
-        
-        OnChanged(Settings[Flag])
 
         return Fallback[Flag]
     end
 
     function Plugins:Slider(Section, Title, Values, Flag, Callback)
-        if Callback then Callback(Settings[Flag]) end
-        return Section:AddSlider(Flag, {
-            Text = Title,
-            Default = Settings[Flag],
+        return Section:Slider({
+            Title = Title,
             Min = Values[1],
             Max = Values[2],
+            Value = Settings[Flag],
             Rounding = Values[3] or 0,
             Callback = function(value)
                 Settings[Flag] = value
@@ -269,42 +238,6 @@ AddModule("Plugins", function()
                 if Callback then Callback(value) end
             end,
         })
-    end
-
-    function Plugins:Input(Section, Title, Flag, Callback)
-        if Callback then Callback(Settings[Flag]) end
-        return Section:AddInput(Flag, {
-            Default = Settings[Flag],
-            Text = Title,
-            Placeholder = " ... ",
-            Callback = function(value)
-                Settings[Flag] = value
-                Configurations:Save(Flag, value)
-
-                if Callback then Callback(value) end
-            end,
-        })
-    end
-
-    function Plugins:Dropdown(Section, Title, Options, Flag, Callback)
-        local IsMulti = typeof(Settings[Flag]) == 'table' and true or false
-
-        local Dropdown = Section:AddDropdown(Flag, {
-            Values = Options or {},
-            Multi = IsMulti,
-            Text = Title,
-            Callback = function(value)
-                Settings[Flag] = value
-                Configurations:Save(Flag, value)
-
-                if Callback then Callback(value) end
-            end,
-        })
-        
-        Dropdown:SetValue(Settings[Flag])
-        if Callback then Callback(Settings[Flag]) end
-        
-        return Dropdown
     end
 
     return Plugins
