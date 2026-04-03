@@ -225,7 +225,7 @@ AddModule("Plugins", function()
     end
 
     function Plugins:Slider(Section, Title, Values, Flag, Callback)
-        return Section:Slider(Flag, {
+        return Section:Slider({
             Title = Title,
             Min = Values[1],
             Max = Values[2],
