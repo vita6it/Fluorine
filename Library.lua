@@ -595,7 +595,7 @@ function Library:App(Args)
                 Parent = PageScrolling_1,
                 PaddingBottom = UDim.new(0, 7),
                 PaddingLeft = UDim.new(0, 1),
-                PaddingRight = UDim.new(0, 7),
+                PaddingRight = UDim.new(0, 15),
                 PaddingTop = UDim.new(0, 1),
             })
 
@@ -1427,5 +1427,6 @@ function Library:App(Args)
 
     return Window
 end
+
 
 return Library
