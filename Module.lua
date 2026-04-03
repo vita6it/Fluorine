@@ -203,7 +203,7 @@ AddModule("Plugins", function()
             else
                 if Active[Flag] then
                     task.cancel(Active[Flag])
-                    ActiveT[Flag] = nil
+                    Active[Flag] = nil
                 end
             end
 
@@ -225,7 +225,7 @@ AddModule("Plugins", function()
     end
 
     function Plugins:Slider(Section, Title, Values, Flag, Callback)
-        return Section:Slider({
+        return Section:Slider(Flag, {
             Title = Title,
             Min = Values[1],
             Max = Values[2],
