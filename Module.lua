@@ -239,6 +239,34 @@ AddModule("Plugins", function()
             end,
         })
     end
+    
+    function Plugins:Dropdown(Section, Title, Values, Flag, Callback)
+        return Section:Dropdown({
+            Title = Title,
+            List = Values,
+            Value = Settings[Flag],
+            Callback = function(value)
+                Settings[Flag] = value
+                Configurations:Save(Flag, value)
+
+                if Callback then Callback(value) end
+            end,
+        })
+    end
+    
+    function Plugins:Textbox(Section, Info, Flag, Callback)
+        return Section:Textbox({
+            Title = Info[1],
+            Description = Info[2] or nil,
+            Value = Settings[Flag],
+            Callback = function(value)
+                Settings[Flag] = value
+                Configurations:Save(Flag, value)
+
+                if Callback then Callback(value) end
+            end,
+        })
+    end
 
     return Plugins
 end)
